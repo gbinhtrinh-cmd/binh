@@ -1,0 +1,247 @@
+/* ── Google Fonts ────────────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@300;400&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: #0f0f0d;
+    color: #f0ece3;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
+    min-height: 100dvh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overscroll-behavior: none;
+  }
+
+  /* Smooth, minimal scrollbar */
+  ::-webkit-scrollbar { width: 2px; height: 2px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.15); }
+
+  /* Tabular numbers everywhere — prevents layout shift on price updates */
+  .font-mono, [class*="font-mono"] {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+
+  /* Smooth color transitions on all text */
+  p, span, div { transition-property: color; transition-duration: 400ms; transition-timing-function: ease; }
+}
+
+/* ── Keyframes ────────────────────────────────────────────────────────────────── */
+
+@keyframes shimmer {
+  0%   { background-position: -400% 0; }
+  100% { background-position:  400% 0; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(14px) scale(0.985); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pageFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes flashBull {
+  0%,100% { background-color: transparent; }
+  12%     { background-color: rgba(34,197,94,0.12); }
+}
+
+@keyframes flashBear {
+  0%,100% { background-color: transparent; }
+  12%     { background-color: rgba(239,68,68,0.12); }
+}
+
+@keyframes pulseSlow {
+  0%,100% { opacity: 1; }
+  50%     { opacity: 0.3; }
+}
+
+@keyframes ticker {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes numFlash {
+  0%,100% { opacity: 1; }
+  40%     { opacity: 0.55; }
+}
+
+/* ── Animation classes ────────────────────────────────────────────────────────── */
+
+.flash-bull { animation: flashBull 1.4s ease-out; }
+.flash-bear { animation: flashBear 1.4s ease-out; }
+
+.slide-up {
+  animation: slideUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: transform, opacity;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.page-enter {
+  animation: pageFadeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-pulse-slow {
+  animation: pulseSlow 2.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.num-flash {
+  animation: numFlash 0.5s ease;
+}
+
+/* Shimmer skeleton — gradient sweep */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.04) 0%,
+    rgba(255,255,255,0.09) 40%,
+    rgba(255,255,255,0.04) 80%
+  );
+  background-size: 400% 100%;
+  animation: shimmer 2s ease-in-out infinite;
+  border-radius: 6px;
+}
+
+/* ── Design tokens ────────────────────────────────────────────────────────────── */
+:root {
+  --gold:       #b8956a;
+  --gold-dim:   rgba(184,149,106,0.12);
+  --bone:       #f0ece3;
+  --warm:       #7a7268;
+  --muted:      #52525b;
+  --faint:      #3a3730;
+  --rule:       rgba(255,255,255,0.07);
+  --rule-soft:  rgba(255,255,255,0.04);
+  --surface:    #0f0f0d;
+  --card:       #161613;
+
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out:    cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Component layer ──────────────────────────────────────────────────────────── */
+@layer components {
+
+  /* ── Eyebrow label ── */
+  .eyebrow {
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--warm);
+  }
+
+  /* ── Card ── */
+  .card {
+    @apply rounded-2xl p-4;
+    background: var(--card);
+    border: 1px solid var(--rule);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  .card:hover { border-color: rgba(255,255,255,0.10); }
+
+  /* ── Badges ── */
+  .badge-high    { @apply text-[9px] font-semibold tracking-widest uppercase px-2 py-0.5 rounded-sm bg-bear-dim    text-bear-text; }
+  .badge-medium  { @apply text-[9px] font-semibold tracking-widest uppercase px-2 py-0.5 rounded-sm bg-caution-dim text-caution-text; }
+  .badge-bull    { @apply text-[9px] font-semibold tracking-widest uppercase px-2 py-0.5 rounded-sm bg-bull-dim    text-bull-text; }
+  .badge-bear    { @apply text-[9px] font-semibold tracking-widest uppercase px-2 py-0.5 rounded-sm bg-bear-dim    text-bear-text; }
+  .badge-neutral { @apply text-[9px] font-semibold tracking-widest uppercase px-2 py-0.5 rounded-sm bg-surface-muted; color: var(--warm); }
+
+  /* ── Signal pills ── */
+  .signal-strong-buy  { font-size:9px; font-weight:600; letter-spacing:0.18em; text-transform:uppercase; padding:3px 8px; border-radius:4px; background:rgba(184,149,106,0.15); color:#c9a87c; border:1px solid rgba(184,149,106,0.3); transition: all 0.25s ease; }
+  .signal-buy-watch   { font-size:9px; font-weight:600; letter-spacing:0.18em; text-transform:uppercase; padding:3px 8px; border-radius:4px; background:rgba(184,149,106,0.08); color:#c9a87c; border:1px solid rgba(184,149,106,0.2); transition: all 0.25s ease; }
+  .signal-hold        { font-size:9px; font-weight:500; letter-spacing:0.18em; text-transform:uppercase; padding:3px 8px; border-radius:4px; background:transparent; color:#7a7268; border:1px solid rgba(255,255,255,0.09); transition: all 0.25s ease; }
+  .signal-avoid       { font-size:9px; font-weight:600; letter-spacing:0.18em; text-transform:uppercase; padding:3px 8px; border-radius:4px; background:rgba(239,68,68,0.08); color:#f87171; border:1px solid rgba(239,68,68,0.2); transition: all 0.25s ease; }
+  .signal-short-watch { font-size:9px; font-weight:600; letter-spacing:0.18em; text-transform:uppercase; padding:3px 8px; border-radius:4px; background:rgba(239,68,68,0.08); color:#fbbf24; border:1px solid rgba(245,158,11,0.2); transition: all 0.25s ease; }
+
+  /* ── Tabs ── */
+  .tab        { font-size:11px; font-weight:500; letter-spacing:0.12em; text-transform:uppercase; color:var(--warm); padding-bottom:8px; transition:color .25s ease; }
+  .tab:hover  { color:var(--bone); }
+  .tab-active { font-size:11px; font-weight:500; letter-spacing:0.12em; text-transform:uppercase; color:#c9a87c; border-bottom:1.5px solid #b8956a; padding-bottom:8px; }
+
+  /* ── Nav items ── */
+  .nav-item        { @apply flex flex-col items-center gap-1 cursor-pointer; font-size:9px; letter-spacing:0.16em; text-transform:uppercase; color:var(--warm); transition: color 0.2s ease; }
+  .nav-item:hover  { color: var(--bone); }
+  .nav-item-active { @apply flex flex-col items-center gap-1 cursor-pointer; font-size:9px; letter-spacing:0.16em; text-transform:uppercase; color:#c9a87c; }
+
+  /* ── Buttons ── */
+  .btn { @apply inline-flex items-center justify-center gap-1.5 disabled:opacity-50; transition: all 0.2s var(--ease-out); }
+
+  .btn-primary {
+    @apply btn rounded-xl text-[10px] font-semibold tracking-widest uppercase px-4 py-2.5;
+    background: var(--gold);
+    color: #0f0f0d;
+  }
+  .btn-primary:hover:not(:disabled) { opacity: 0.82; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(184,149,106,0.25); }
+  .btn-primary:active:not(:disabled) { transform: translateY(0); box-shadow: none; }
+
+  .btn-ghost {
+    @apply btn rounded-xl text-[10px] font-medium tracking-widest uppercase px-4 py-2.5;
+    color: var(--warm);
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .btn-ghost:hover:not(:disabled) { border-color: rgba(255,255,255,0.2); color: var(--bone); background: rgba(255,255,255,0.03); }
+
+  /* ── Input ── */
+  .input {
+    @apply rounded-xl px-3 py-2.5 text-sm outline-none;
+    color: var(--bone);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.09);
+    transition: border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+  }
+  .input::placeholder { color: var(--warm); }
+  .input:focus {
+    border-color: var(--gold);
+    background: rgba(255,255,255,0.06);
+    box-shadow: 0 0 0 3px rgba(184,149,106,0.08);
+  }
+
+  /* ── Pulse dot ── */
+  .pulse-dot { @apply w-1.5 h-1.5 rounded-full animate-pulse-slow; }
+
+  /* ── Smooth price numbers ── */
+  .price-num {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+    transition: color 0.5s ease;
+    will-change: color;
+  }
+
+  /* ── Expand panel (smooth open/close) ── */
+  .expand-panel {
+    overflow: hidden;
+    transition: max-height 0.4s var(--ease-in-out), opacity 0.3s ease;
+  }
+  .expand-panel-inner {
+    transition: opacity 0.25s ease 0.1s, transform 0.3s var(--ease-spring);
+  }
+}
+
+/* ── Scrollbar hide utility ──────────────────────────────────────────────────── */
+.scrollbar-none::-webkit-scrollbar { display: none; }
+.scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }

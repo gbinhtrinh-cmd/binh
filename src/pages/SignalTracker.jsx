@@ -1,0 +1,127 @@
+import { useState, useMemo } from 'react'
+import { useStore } from '../store/useStore'
+import { formatTime, formatDate } from '../lib/api'
+import { Zap } from 'lucide-react'
+
+const STATUS_BADGE = {
+  ACTIVE:   'bg-bull-dim text-bull-text',
+  WATCHING: 'bg-caution-dim text-caution-text',
+  RESOLVED: 'bg-surface-border text-slate-400',
+}
+
+const TYPE_COLOR = {
+  'PRICE ALERT: SESSION MOVE':  'text-bull-text',
+  'PRICE ALERT: SHARP DROP':    'text-bear-text',
+  'NEWS ALERT: ANALYST ACTION': 'text-accent-text',
+  'NEWS ALERT: EARNINGS/DELIVERY': 'text-caution-text',
+  'NEWS ALERT: HIGH IMPACT':    'text-caution-text',
+  'SENTIMENT ALERT: HIGH BUZZ': 'text-caution-text',
+  'SENTIMENT ALERT: BEARISH SHIFT': 'text-bear-text',
+  'MARKET ALERT: SPY WEAKNESS': 'text-bear-text',
+  'MARKET ALERT: VIX WARNING':  'text-bear-text',
+  'MARKET ALERT: DEFENSIVE MODE': 'text-bear-text',
+}
+
+const CONF_BADGE = {
+  High:   'bg-bull-dim text-bull-text',
+  Medium: 'bg-caution-dim text-caution-text',
+  Low:    'bg-surface-border text-slate-400',
+}
+
+const SENT_BADGE = {
+  BULLISH: 'text-bull-text',
+  NEUTRAL: 'text-caution-text',
+  BEARISH: 'text-bear-text',
+}
+
+function dayLabel(ts) {
+  const d = new Date(ts)
+  const today = new Date()
+  const diff = Math.floor((today - d) / 86400000)
+  if (diff === 0) return 'Today'
+  if (diff === 1) return 'Yesterday'
+  return formatDate(ts)
+}
+
+export default function SignalTracker() {
+  const signalsLog = useStore(s => s.signalsLog)
+  const timezone = useStore(s => s.timezone)
+  const [filterDays, setFilterDays] = useState(7)
+
+  const cutoff = Date.now() - filterDays * 86400000
+  const filtered = useMemo(() => signalsLog.filter(s => s.time >= cutoff).sort((a, b) => b.time - a.time), [signalsLog, filterDays])
+
+  // Group by day
+  const grouped = useMemo(() => {
+    const map = new Map()
+    filtered.forEach(s => {
+      const label = dayLabel(s.time)
+      if (!map.has(label)) map.set(label, [])
+      map.get(label).push(s)
+    })
+    return [...map.entries()]
+  }, [filtered])
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h1 className="text-lg font-bold text-slate-100">Signal Tracker</h1>
+          <p className="text-xs text-slate-500">{filtered.length} signals in last {filterDays} days</p>
+        </div>
+        <select
+          value={filterDays}
+          onChange={e => setFilterDays(Number(e.target.value))}
+          className="input text-xs py-1 px-2"
+        >
+          <option value={1}>Today</option>
+          <option value={3}>3 Days</option>
+          <option value={7}>7 Days</option>
+        </select>
+      </div>
+
+      {grouped.length === 0 ? (
+        <div className="text-center text-slate-500 py-12 text-sm">No signals in this period</div>
+      ) : (
+        grouped.map(([day, signals]) => (
+          <div key={day} className="mb-6">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{day}</span>
+              <div className="flex-1 h-px bg-surface-border" />
+              <span className="text-xs text-slate-600">{signals.length}</span>
+            </div>
+            <div className="space-y-2">
+              {signals.map(sig => (
+                <div key={sig.id} className="card animate-fade-in">
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-bold font-mono text-sm text-slate-100">{sig.ticker}</span>
+                      <span className={`text-xs font-mono ${TYPE_COLOR[sig.type] ?? 'text-slate-300'}`}>{sig.type}</span>
+                    </div>
+                    <span className="text-[10px] text-slate-500 font-mono whitespace-nowrap">{formatTime(sig.time, timezone)}</span>
+                  </div>
+                  <p className="text-xs text-slate-400 mb-2 leading-relaxed">{sig.newsDriver}</p>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className={`text-xs px-2 py-0.5 rounded font-bold ${CONF_BADGE[sig.confidence] ?? 'badge-neutral'}`}>
+                      {sig.confidence} Confidence
+                    </span>
+                    <span className={`text-xs font-bold ${SENT_BADGE[sig.sentiment] ?? 'text-slate-400'}`}>{sig.sentiment}</span>
+                    <span className={`text-xs px-2 py-0.5 rounded font-bold ${STATUS_BADGE[sig.status] ?? 'badge-neutral'}`}>{sig.status}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))
+      )}
+
+      {filtered.length === 0 && (
+        <div className="text-center py-16">
+          <Zap size={32} className="mx-auto text-slate-600 mb-3" />
+          <p className="text-slate-500 text-sm">No signals logged yet.</p>
+          <p className="text-slate-600 text-xs mt-1">Signals are generated by the automated monitor</p>
+        </div>
+      )}
+    </div>
+  )
+}
